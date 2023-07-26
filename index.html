@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MoneyAI</title>
+  <link rel="icon" href="https://document-export.canva.com/62AJ8/DAFpXw62AJ8/2/thumbnail/0001.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQYCGKMUHWDTJW6UD%2F20230722%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20230722T234533Z&X-Amz-Expires=59809&X-Amz-Signature=54ec06792617417a361f23d13b1b93f8fc890e7e1d8b4fdf27ff2f85929de065&X-Amz-SignedHeaders=host&response-expires=Sun%2C%2023%20Jul%202023%2016%3A22%3A22%20GMT" type="image/x-icon">
+  <style>
+    /* Estilos gerais */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #000; /* Fundo preto */
+      color: #fff;
+      text-align: center;
+    }
+
+    /* Estilos para o container das calculadoras */
+    .container {
+      max-width: 1200px; /* Largura máxima do container */
+      margin: 0 auto; /* Centraliza o container na página */
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+
+    /* Estilos para cada calculadora */
+    .calculator {
+      flex-basis: calc(30% - 20px);
+      margin: 10px;
+      padding: 20px;
+      box-sizing: border-box; /* Inclui a margem e o preenchimento na largura total */
+    }
+
+    /* Estilos para a mensagem de boas-vindas */
+    .welcome-message {
+      font-size: 24px;
+      font-weight: bold;
+      color: #fff;
+      animation: pulsar 2s ease-in-out infinite; /* Adiciona a animação "pulsar" */
+      margin-bottom: 20px; /* Espaçamento inferior para separar as calculadoras */
+    }
+
+    /* Definição da animação "pulsar" */
+    @keyframes pulsar {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.2);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    /* Estilos específicos para a faixa azul no resultado */
+    .blue-result {
+      background-color: #0000FF;
+      padding: 10px;
+    }
+
+    /* Estilos específicos para a faixa vermelha no resultado */
+    .red-result {
+      background-color: #FF0000;
+      padding: 10px;
+    }
+
+    /* Estilos específicos para a faixa verde no resultado */
+    .green-result {
+      background-color: #00FF00; /* Verde */
+      padding: 10px;
+    }
+
+    /* Estilos específicos para a faixa roxa no resultado */
+    .purple-result {
+      background-color: #800080; /* Roxo */
+      padding: 10px;
+    }
+
+    /* Estilos para a seção de resultado da calculadora */
+    .resultado {
+      height: 100px; /* Ajuste a altura conforme necessário */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Estilos para os botões de cores */
+    .color-buttons {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+
+    .color-button {
+      margin: 0 5px;
+      padding: 5px 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .blue-button {
+      background-color: #0000FF;
+      color: #fff;
+    }
+
+    .red-button {
+      background-color: #FF0000;
+      color: #fff;
+    }
+
+    .green-button {
+      background-color: #00FF00;
+      color: #fff;
+    }
+
+    /* Estilos específicos para a cor do botão da segunda calculadora (amarelo) */
+    #resultado2 .color-button.yellow-button {
+      background-color: #FFFF00; /* Amarelo */
+    }
+
+    /* Estilos específicos para a cor do texto */
+    .color-text {
+      color: #fff;
+    }
+
+    /* Estilos específicos para a faixa amarela no resultado */
+    .yellow-result {
+      background-color: #FFFF00; /* Amarelo */
+      padding: 10px;
+    }  /* Estilos para o <iframe> */
+    iframe {
+      display: block;
+      margin: 0 auto;
+  </style>
+</head>
+<body>
+  <div class="welcome-message">
+    Seja bem-vindo à nova era da IA
+  </div>
+
+  <!-- Áudio para reproduzir o som de clique -->
+  <audio id="clickSound">
+    <source src="https://drive.google.com/uc?id=1hjYBk4kDXFl2u6qSUFMQRqSbJrHtN4l0" type="audio/mpeg">
+    Seu navegador não suporta áudio.
+  </audio>
+
+  <script>
+    // Função para exibir a mensagem por 3 segundos
+    function showWelcomeMessage() {
+      var welcomeMessage = document.querySelector(".welcome-message");
+      welcomeMessage.style.display = "block"; // Exibir a mensagem
+
+      setTimeout(function () {
+        welcomeMessage.style.display = "none"; // Ocultar a mensagem após 3 segundos
+      }, 3000); // 3000 milissegundos = 3 segundos
+    }
+
+    // Função para mostrar a mensagem "IA procurando uma jogada" por 5 segundos
+    function mostrarMensagemIA(resultadoElement, calculadora) {
+      resultadoElement.innerText = "IA procurando uma jogada";
+
+      setTimeout(function () {
+        if (calculadora === 2) {
+          calcularResultado2(resultadoElement);
+        } else {
+          calcularResultado(resultadoElement);
+        }
+      }, 2000); // 2000 milissegundos = 2 segundos
+
+      // Limpar campo de sequência após 5 segundos
+      setTimeout(function () {
+        const inputSequencia = resultadoElement.parentElement.querySelector('input[type="text"]');
+        inputSequencia.value = '';
+      }, 5000); // 5000 milissegundos = 5 segundos
+    }
+
+    // Função para reproduzir o som de clique
+    function playClickSound() {
+      const clickSound = document.getElementById('clickSound');
+      clickSound.play();
+    }
+
+    // Função para adicionar a cor ao input de sequência
+    function adicionarCor(cor, resultadoElement) {
+      const inputSequencia = resultadoElement.parentElement.querySelector('input[type="text"]');
+      inputSequencia.value += cor + ' ';
+    }
+
+    // Função para calcular o resultado da primeira calculadora
+    function calcularResultado(resultadoElement) {
+      playClickSound(); // Reproduzir o som de clique
+
+      resultadoElement.innerHTML = '';
+
+      const inputSequencia = resultadoElement.parentElement.querySelector('input[type="text"]');
+      const sequenciaDigitada = inputSequencia.value.toLowerCase().trim().split(' ');
+
+      // Lógica da IA DADOS (Exemplo: mesma lógica da primeira calculadora)
+      const combinacaoAVAV = sequenciaDigitada.join(' ') === 'azul vermelho azul vermelho';
+      const combinacaoVAVA = sequenciaDigitada.join(' ') === 'vermelho azul vermelho azul';
+      const combinacaoAAVV = sequenciaDigitada.join(' ') === 'azul azul vermelho vermelho';
+      const combinacaoVVAA = sequenciaDigitada.join(' ') === 'vermelho vermelho azul azul';
+      const combinacaoAVVA = sequenciaDigitada.join(' ') === 'azul vermelho verde azul';
+      const combinacaoVAAV = sequenciaDigitada.join(' ') === 'vermelho azul azul vermelho';
+      const combinacaoAAVVV = sequenciaDigitada.join(' ') === 'amarelo amarelo vermelho vermelho';
+
+      if (combinacaoAVAV || combinacaoAAVV || combinacaoAVVA || combinacaoVAAV) {
+        resultadoElement.innerHTML = '<p class="color-text">ENTRE NO VERMELHO</p>';
+        resultadoElement.classList.remove('blue-result', 'green-result', 'purple-result');
+        resultadoElement.classList.add('red-result');
+
+        // Ocultar o resultado e a faixa após 15 segundos
+        setTimeout(function () {
+          resultadoElement.innerHTML = '-';
+          resultadoElement.classList.remove('red-result'); // Remover classe para ocultar a faixa de resultado
+        }, 15000); // 15000 milissegundos = 15 segundos
+      } else if (combinacaoVAVA || combinacaoVVAA || combinacaoAVVA) {
+        resultadoElement.innerHTML = '<p class="color-text">ENTRE NO AZUL</p>';
+        resultadoElement.classList.remove('red-result', 'green-result', 'purple-result');
+        resultadoElement.classList.add('blue-result');
+
+        // Ocultar o resultado e a faixa após 15 segundos
+        setTimeout(function () {
+          resultadoElement.innerHTML = '-';
+          resultadoElement.classList.remove('blue-result'); // Remover classe para ocultar a faixa de resultado
+        }, 15000); // 15000 milissegundos = 15 segundos
+      } else if (combinacaoAAVVV) {
+        resultadoElement.innerHTML = '<p class="color-text">ENTRE NO AMARELO</p>';
+        resultadoElement.classList.remove('blue-result', 'green-result', 'red-result', 'purple-result');
+        resultadoElement.classList.add('yellow-result');
+
+        // Ocultar o resultado e a faixa após 15 segundos
+        setTimeout(function () {
+          resultadoElement.innerHTML = '-';
+          resultadoElement.classList.remove('yellow-result'); // Remover classe para ocultar a faixa de resultado
+        }, 15000); // 15000 milissegundos = 15 segundos
+      } else {
+        resultadoElement.innerHTML = '<p class="color-text">IA NAO ENCONTROU ENTRADAS</p>';
+        resultadoElement.classList.remove('blue-result', 'red-result', 'green-result', 'purple-result');
+
+        // Ocultar o resultado e a faixa após 15 segundos
+        setTimeout(function () {
+          resultadoElement.innerHTML = '-';
+        }, 15000); // 15000 milissegundos = 15 segundos
+      }
+    }
+
+    // Função para calcular o resultado da segunda calculadora
+    function calcularResultado2(resultadoElement) {
+      playClickSound(); // Reproduzir o som de clique
+
+      resultadoElement.innerHTML = '';
+
+      const inputSequencia = resultadoElement.parentElement.querySelector('input[type="text"]');
+      const sequenciaDigitada = inputSequencia.value.toLowerCase().trim().split(' ');
+
+      // Lógica da IA DADOS para a segunda calculadora
+      const combinacaoRRYY = sequenciaDigitada.join(' ') === 'vermelho vermelho amarelo amarelo';
+      const combinacaoRRRY = sequenciaDigitada.join(' ') === 'vermelho vermelho vermelho amarelo';
+      const combinacaoYYYR = sequenciaDigitada.join(' ') === 'amarelo amarelo amarelo vermelho';
+      const combinacaoYRYR = sequenciaDigitada.join(' ') === 'amarelo vermelho amarelo vermelho';
+      const combinacaoRYRE = sequenciaDigitada.join(' ') === 'vermelho amarelo vermelho amarelo';
+      const combinacaoYRYE = sequenciaDigitada.join(' ') === 'amarelo vermelho amarelo empate';
+      const combinacaoRYREmpate = sequenciaDigitada.join(' ') === 'vermelho amarelo vermelho empate';
+      const combinacaoYRYEmpate = sequenciaDigitada.join(' ') === 'amarelo vermelho amarelo empate';
+
+      if (combinacaoRRYY || combinacaoRRRY || combinacaoYRYR || combinacaoYRYE || combinacaoRYREmpate || combinacaoYRYEmpate) {
+        resultadoElement.innerHTML = '<p class="color-text">ENTRE NO VERMELHO</p>';
+        resultadoElement.classList.remove('blue-result', 'green-result', 'yellow-result');
+        resultadoElement.classList.add('red-result');
+
+        // Ocultar o resultado e a faixa após 15 segundos
+        setTimeout(function () {
+          resultadoElement.innerHTML = '-';
+          resultadoElement.classList.remove('red-result'); // Remover classe para ocultar a faixa de resultado
+        }, 15000); // 15000 milissegundos = 15 segundos
+      } else if (combinacaoYYYR) {
+        resultadoElement.innerHTML = '<p class="color-text">ENTRE NO AMARELO</p>';
+        resultadoElement.classList.remove('blue-result', 'green-result', 'red-result');
+        resultadoElement.classList.add('yellow-result');
+
+        // Ocultar o resultado e a faixa após 15 segundos
+        setTimeout(function () {
+          resultadoElement.innerHTML = '-';
+          resultadoElement.classList.remove('yellow-result'); // Remover classe para ocultar a faixa de resultado
+        }, 15000); // 15000 milissegundos = 15 segundos
+      } else {
+        resultadoElement.innerHTML = '<p class="color-text">IA NAO ENCONTROU ENTRADAS</p>';
+        resultadoElement.classList.remove('blue-result', 'red-result', 'green-result', 'yellow-result');
+
+        // Ocultar o resultado e a faixa após 15 segundos
+        setTimeout(function () {
+          resultadoElement.innerHTML = '-';
+        }, 15000); // 15000 milissegundos = 15 segundos
+      }
+    }
+
+    // Chamando a função showWelcomeMessage para exibir a mensagem
+    showWelcomeMessage();
+  </script>
+  <a id="topo"></a> <!-- Âncora para abrir a página no topo -->
+
+
+  <div class="container">
+    <!-- Calculadora 1 -->
+    <div class="calculator">
+      <h1>IA DADOS</h1>
+      <label for="inputSequencia">Sequência de cores:</label>
+      <div class="color-buttons">
+        <button class="color-button blue-button" onclick="adicionarCor('azul', document.getElementById('resultado'))">Azul</button>
+        <button class="color-button red-button" onclick="adicionarCor('vermelho', document.getElementById('resultado'))">Vermelho</button>
+        <button class="color-button green-button" onclick="adicionarCor('verde', document.getElementById('resultado'))">Empate</button>
+      </div>
+      <input type="text" id="inputSequencia">
+      <button onclick="mostrarMensagemIA(document.getElementById('resultado'), 1)">Obter Entrada</button>
+      <div class="resultado" id="resultado">-</div>
+    </div>
+
+    <!-- Calculadora 2 (Cópia da Calculadora 1) -->
+    <div class="calculator">
+      <h1>IA DRAGON</h1>
+      <label for="inputSequencia2">Sequência de cores:</label>
+      <div class="color-buttons">
+        <button class="color-button yellow-button" onclick="adicionarCor('amarelo', document.getElementById('resultado2'))">Amarelo</button>
+        <button class="color-button red-button" onclick="adicionarCor('vermelho', document.getElementById('resultado2'))">Vermelho</button>
+        <button class="color-button green-button" onclick="adicionarCor('verde', document.getElementById('resultado2'))">Empate</button>
+      </div>
+      <input type="text" id="inputSequencia2">
+      <button onclick="mostrarMensagemIA(document.getElementById('resultado2'), 2)">Obter Entrada</button>
+      <div class="resultado" id="resultado2">-</div>
+    </div>
+
+    <!-- Calculadora 3 (Cópia da Calculadora 1) -->
+    <div class="calculator">
+      <h1>IA FOOTBALL</h1>
+      <label for="inputSequencia3">Sequência de cores:</label>
+      <div class="color-buttons">
+        <button class="color-button blue-button" onclick="adicionarCor('azul', document.getElementById('resultado3'))">Azul</button>
+        <button class="color-button red-button" onclick="adicionarCor('vermelho', document.getElementById('resultado3'))">Vermelho</button>
+        <button class="color-button green-button" onclick="adicionarCor('verde', document.getElementById('resultado3'))">Empate</button>
+      </div>
+      <input type="text" id="inputSequencia3">
+      <button onclick="mostrarMensagemIA(document.getElementById('resultado3'), 1)">Obter Entrada</button>
+      <div class="resultado" id="resultado3">-</div>
+    </div>
+  </div><body>
+  
+  
+  <iframe src="https://9f.com/r/PXrGBosV" width="800" height="600" frameborder="0"></iframe>
+
+  <a href="#topo">Voltar ao topo</a>
+</body>
+</html>
