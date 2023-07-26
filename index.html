@@ -182,6 +182,10 @@
       display: block;
       margin: 0 auto;
     }
+
+    .cadastro-button {
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
@@ -194,6 +198,8 @@
       </form>
       <div id="errorMessage" class="error-message" style="display: none;">Senha incorreta.</div>
     </div>
+    <!-- Botão Cadastre-se -->
+    <button class="cadastro-button" onclick="window.location.href='https://t.me/+09IegxT5FZFiNTIx'">Cadastre-se</button>
   </div>
 
   <div class="main-container" style="display: none;">
@@ -207,7 +213,14 @@
     </audio>
 
     <script>
-      const password = "minhasenha"; // Defina a senha desejada para autenticação
+      const passwords = [
+        "minhasenha",
+        "ademilson",
+        "maiara",
+        "peedro",
+        "debora",
+        "dulce",
+      ]; // Lista de senhas permitidas
 
       function showWelcomeMessage() {
         var welcomeMessage = document.querySelector(".welcome-message");
@@ -221,7 +234,7 @@
       function doLogin() {
         const inputPassword = document.getElementById("password").value;
 
-        if (inputPassword === password) {
+        if (passwords.includes(inputPassword)) {
           document.querySelector(".auth-container").style.display = "none";
           document.querySelector(".main-container").style.display = "block";
           showWelcomeMessage();
